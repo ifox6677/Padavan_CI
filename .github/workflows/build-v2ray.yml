@@ -25,7 +25,7 @@ jobs:
     - name: Set up Go
       uses: actions/setup-go@v4
       with:
-        go-version: '1.20'
+        go-version: '1.20' # 根据需要选择 Go 版本
 
     - name: Install build dependencies
       run: |
@@ -50,13 +50,13 @@ jobs:
         wget https://codeload.github.com/v2fly/v2ray-core/tar.gz/v5.19.0 -O v2ray-5.19.0.tar.gz
         echo "3c1fec2c5fb787d2929ecb68a6d4d3f0afa2d820a2b825d66a1632105864c8f4  v2ray-5.19.0.tar.gz" | sha256sum -c -
 
-    - name: Extract v2ray source
-      run: tar -xzf v2ray-5.19.0.tar.gz -C $(BUILD_DIR)
-
     - name: Create build and ROMFS directories
       run: |
-        mkdir -p $(BUILD_DIR)
-        mkdir -p $(ROMFSDIR)/usr/bin
+        mkdir -p $BUILD_DIR
+        mkdir -p $ROMFSDIR/usr/bin
+
+    - name: Extract v2ray source
+      run: tar -xzf v2ray-5.19.0.tar.gz -C $BUILD_DIR
 
     - name: Build v2ray
       env:
@@ -67,7 +67,7 @@ jobs:
 
     - name: Verify build
       run: |
-        if [ ! -f "$(BUILD_DIR)/v2ray-core-5.19.0/main/v2ray" ]; then
+        if [ ! -f "$BUILD_DIR/v2ray-core-5.19.0/main/v2ray" ]; then
           echo "v2ray binary not found!"
           exit 1
         fi
@@ -79,7 +79,7 @@ jobs:
       uses: actions/upload-artifact@v3
       with:
         name: v2ray-binary
-        path: $(ROMFSDIR)/usr/bin/v2ray
+        path: $ROMFSDIR/usr/bin/v2ray
 
     # 可选步骤：发布到 GitHub Releases
     - name: Create Release
@@ -99,6 +99,6 @@ jobs:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       with:
         upload_url: ${{ steps.create_release.outputs.upload_url }}
-        asset_path: $(ROMFSDIR)/usr/bin/v2ray
+        asset_path: $ROMFSDIR/usr/bin/v2ray
         asset_name: v2ray-linux-mipsle
         asset_content_type: application/octet-stream
