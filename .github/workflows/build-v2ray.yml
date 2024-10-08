@@ -22,8 +22,8 @@ jobs:
     - name: Checkout repository
       uses: actions/checkout@v3
 
-    - name: List repository contents
-      run: ls -la
+    - name: List root directory contents
+      run: ls -la $ROOTDIR
 
     - name: Set up Go
       uses: actions/setup-go@v4
@@ -64,12 +64,20 @@ jobs:
     - name: List build directory contents
       run: ls -la $BUILD_DIR
 
+    - name: Check Makefile existence in V2ray directory
+      run: |
+        if [ ! -f "$ROOTDIR/V2ray/Makefile" ]; then
+          echo "Makefile not found in V2ray directory!"
+          exit 1
+        fi
+        ls -la $ROOTDIR/V2ray
+
     - name: Build v2ray
       env:
         GOOS: linux
         GOARCH: mipsle
         CGO_ENABLED: 0
-      run: make -C $ROOTDIR # 根据 Makefile 的位置调整
+      run: make -C $ROOTDIR/V2ray
 
     - name: Verify build
       run: |
@@ -77,9 +85,13 @@ jobs:
           echo "v2ray binary not found!"
           exit 1
         fi
+        ls -la $BUILD_DIR/v2ray-core-5.19.0/main/
 
     - name: Install v2ray to ROMFS
-      run: make romfs
+      run: make -C $ROOTDIR/V2ray romfs
+
+    - name: List ROMFS directory contents
+      run: ls -la $ROMFSDIR/usr/bin
 
     - name: Upload build artifact
       uses: actions/upload-artifact@v3
@@ -94,8 +106,8 @@ jobs:
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       with:
-        tag_name: v${{ github.run_number }}
-        release_name: Release v${{ github.run_number }}
+        tag_name: v${{ github.run_number }}-mipsle
+        release_name: Release v${{ github.run_number }} for mipsle
         draft: false
         prerelease: false
 
