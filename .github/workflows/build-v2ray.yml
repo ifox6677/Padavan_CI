@@ -11,10 +11,13 @@ on:
 jobs:
   build:
     runs-on: ubuntu-latest
-    strategy:
-      matrix:
-        go-version: [1.20]
-        goarch: [mipsle, amd64, arm64]  # 添加您需要支持的架构
+
+    env:
+      ROOTDIR: ${{ github.workspace }}
+      INCLUDE_DIR: ${{ github.workspace }}/include
+      BUILD_DIR: ${{ github.workspace }}/build
+      ROMFSDIR: ${{ github.workspace }}/romfs
+
     steps:
     - name: Checkout repository
       uses: actions/checkout@v3
@@ -22,10 +25,15 @@ jobs:
     - name: Set up Go
       uses: actions/setup-go@v4
       with:
-        go-version: ${{ matrix.go-version }}
+        go-version: '1.20'
 
     - name: Install build dependencies
-      run: sudo apt-get update && sudo apt-get install -y make
+      run: |
+        sudo apt-get update
+        sudo apt-get install -y build-essential make wget
+
+    - name: Verify Go installation
+      run: go version
 
     - name: Cache Go modules
       uses: actions/cache@v3
@@ -33,21 +41,64 @@ jobs:
         path: |
           ~/.cache/go-build
           ~/go/pkg/mod
-        key: ${{ runner.os }}-go-${{ matrix.go-version }}-${{ hashFiles('**/go.sum') }}
+        key: ${{ runner.os }}-go-${{ hashFiles('**/go.sum') }}
         restore-keys: |
-          ${{ runner.os }}-go-${{ matrix.go-version }}-
           ${{ runner.os }}-go-
-    
+
+    - name: Download v2ray source
+      run: |
+        wget https://codeload.github.com/v2fly/v2ray-core/tar.gz/v5.19.0 -O v2ray-5.19.0.tar.gz
+        echo "3c1fec2c5fb787d2929ecb68a6d4d3f0afa2d820a2b825d66a1632105864c8f4  v2ray-5.19.0.tar.gz" | sha256sum -c -
+
+    - name: Extract v2ray source
+      run: tar -xzf v2ray-5.19.0.tar.gz -C $(BUILD_DIR)
+
+    - name: Create build and ROMFS directories
+      run: |
+        mkdir -p $(BUILD_DIR)
+        mkdir -p $(ROMFSDIR)/usr/bin
+
     - name: Build v2ray
       env:
         GOOS: linux
-        GOARCH: ${{ matrix.goarch }}
+        GOARCH: mipsle
         CGO_ENABLED: 0
       run: make
+
+    - name: Verify build
+      run: |
+        if [ ! -f "$(BUILD_DIR)/v2ray-core-5.19.0/main/v2ray" ]; then
+          echo "v2ray binary not found!"
+          exit 1
+        fi
+
+    - name: Install v2ray to ROMFS
+      run: make romfs
 
     - name: Upload build artifact
       uses: actions/upload-artifact@v3
       with:
-        name: v2ray-${{ matrix.goarch }}
-        path: path/to/v2ray  # 替换为实际生成的二进制文件路径
+        name: v2ray-binary
+        path: $(ROMFSDIR)/usr/bin/v2ray
 
+    # 可选步骤：发布到 GitHub Releases
+    - name: Create Release
+      id: create_release
+      uses: actions/create-release@v1
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      with:
+        tag_name: v${{ github.run_number }}
+        release_name: Release v${{ github.run_number }}
+        draft: false
+        prerelease: false
+
+    - name: Upload Release Asset
+      uses: actions/upload-release-asset@v1
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      with:
+        upload_url: ${{ steps.create_release.outputs.upload_url }}
+        asset_path: $(ROMFSDIR)/usr/bin/v2ray
+        asset_name: v2ray-linux-mipsle
+        asset_content_type: application/octet-stream
