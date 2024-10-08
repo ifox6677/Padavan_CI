@@ -21,6 +21,9 @@ jobs:
     steps:
     - name: Checkout repository
       uses: actions/checkout@v3
+      with:
+        # 如果您的仓库使用了子模块，请启用以下选项
+        submodules: true
 
     - name: List root directory contents
       run: ls -la $ROOTDIR
@@ -137,3 +140,39 @@ jobs:
         asset_path: $ROMFSDIR/usr/bin/v2ray
         asset_name: v2ray-linux-mipsle
         asset_content_type: application/octet-stream
+    ```
+
+### 2.2 关键调整和解释
+
+1. **Checkout 仓库并初始化子模块**：
+   - 如果您的仓库使用了子模块（如 `V2ray` 目录是一个子模块），确保在 `actions/checkout` 步骤中启用子模块：
+     ```yaml
+     - name: Checkout repository
+       uses: actions/checkout@v3
+       with:
+         submodules: true
+     ```
+
+2. **调试步骤**：
+   - **列出根目录内容**：帮助确认 `V2ray` 目录是否存在。
+   - **列出 `V2ray` 目录内容**：确认 `Makefile` 是否存在。
+   - **列出包含文件目录内容**：确保 `rules.mk` 和 `package.mk` 存在。
+
+3. **指定 `make` 运行目录**：
+   - 使用 `make -C $ROOTDIR/V2ray` 确保 `make` 在包含 `Makefile` 的 `V2ray` 目录中运行。
+
+4. **验证构建产物**：
+   - 检查 `v2ray` 二进制文件是否生成，并列出其所在目录内容以确认。
+
+5. **上传构建产物**：
+   - 使用 `actions/upload-artifact@v3` 上传生成的 `v2ray` 二进制文件。
+
+6. **可选发布步骤**：
+   - 自动创建 GitHub Release 并上传构建产物，方便分发。
+
+### 2.3 调整工作流路径
+
+根据您的仓库结构，如果 `V2ray` 目录位于子目录中，请确保工作流中引用的路径正确。例如，如果 `V2ray` 位于 `projects/V2ray`，请调整为：
+
+```yaml
+run: make -C $ROOTDIR/projects/V2ray
