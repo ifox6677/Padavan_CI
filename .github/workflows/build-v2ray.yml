@@ -22,6 +22,9 @@ jobs:
     - name: Checkout repository
       uses: actions/checkout@v3
 
+    - name: List repository contents
+      run: ls -la
+
     - name: Set up Go
       uses: actions/setup-go@v4
       with:
@@ -58,12 +61,15 @@ jobs:
     - name: Extract v2ray source
       run: tar -xzf v2ray-5.19.0.tar.gz -C $BUILD_DIR
 
+    - name: List build directory contents
+      run: ls -la $BUILD_DIR
+
     - name: Build v2ray
       env:
         GOOS: linux
         GOARCH: mipsle
         CGO_ENABLED: 0
-      run: make
+      run: make -C $ROOTDIR # 根据 Makefile 的位置调整
 
     - name: Verify build
       run: |
