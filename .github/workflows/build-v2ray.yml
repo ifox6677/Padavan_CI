@@ -68,9 +68,25 @@ jobs:
       run: |
         if [ ! -f "$ROOTDIR/V2ray/Makefile" ]; then
           echo "Makefile not found in V2ray directory!"
+          ls -la $ROOTDIR/V2ray
           exit 1
         fi
         ls -la $ROOTDIR/V2ray
+
+    - name: Check included files existence
+      run: |
+        if [ ! -f "$ROOTDIR/rules.mk" ]; then
+          echo "rules.mk not found in ROOTDIR!"
+          ls -la $ROOTDIR
+          exit 1
+        fi
+
+        if [ ! -f "$INCLUDE_DIR/package.mk" ]; then
+          echo "package.mk not found in INCLUDE_DIR!"
+          ls -la $INCLUDE_DIR
+          exit 1
+        fi
+        ls -la $INCLUDE_DIR
 
     - name: Build v2ray
       env:
@@ -83,6 +99,7 @@ jobs:
       run: |
         if [ ! -f "$BUILD_DIR/v2ray-core-5.19.0/main/v2ray" ]; then
           echo "v2ray binary not found!"
+          ls -la $BUILD_DIR/v2ray-core-5.19.0/main/
           exit 1
         fi
         ls -la $BUILD_DIR/v2ray-core-5.19.0/main/
@@ -90,8 +107,8 @@ jobs:
     - name: Install v2ray to ROMFS
       run: make -C $ROOTDIR/V2ray romfs
 
-    - name: List ROMFS directory contents
-      run: ls -la $ROMFSDIR/usr/bin
+    - name: Verify ROMFS installation
+      run: ls -la $ROMFSDIR/usr/bin/
 
     - name: Upload build artifact
       uses: actions/upload-artifact@v3
