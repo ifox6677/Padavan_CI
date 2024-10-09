@@ -82,7 +82,7 @@ on:
       firmwarever:
         description: 'firmware''s version'
         required: true
-        default: '20240403'
+        default: '20240903'
       uploadanon:
         type: boolean
         description: 'upload firmware to anonfiles'
