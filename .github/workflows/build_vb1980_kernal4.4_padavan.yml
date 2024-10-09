@@ -47,7 +47,7 @@ on:
       customization:
         description: 'json format string of customized configs'
         required: true
-        default: '{"rainbowui":"n","specializedlogo":"n","changebrandlogo":"n","lanip":"192.178.8.1","signaccount":"admin","signpassword":"admin","wifi2gssid":"","wifi5gssid":"","wifi2gpsk":"","wifi5gpsk":""}'
+        default: '{"rainbowui":"y","specializedlogo":"n","changebrandlogo":"n","lanip":"192.178.8.1","signaccount":"admin","signpassword":"admin","wifi2gssid":"","wifi5gssid":"","wifi2gpsk":"","wifi5gpsk":""}'
       firmwarever:
         description: 'firmware''s version'
         required: true
@@ -497,7 +497,7 @@ jobs:
       with:
         name: Padavan44-packages
         path: |
-          ${{ env.FIRMWARE }}/*.trx
+          path: ${{ env.FIRMWARE }}
           $WORK_PATH/trunk/.config
 
     - name: Upload firmware to anonfiles
