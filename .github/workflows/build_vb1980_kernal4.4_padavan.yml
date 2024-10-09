@@ -7,17 +7,6 @@ on:
         type: choice
         description: 'target to compile'
         options:
-        - 360_T6M
-        - 360_T6M-PB
-        - Arcadyan_WE410443-TC
-        - Asus_RT-AC85P
-        - C-Life_XG1
-        - Diting_NEWIFI3
-        - DLINK_DIR-878
-        - DLINK_DIR-882
-        - FCJ_G-AX1800_Black
-        - FCJ_G-AX1800_White
-        - Gee_B70
         - GHL_R-001
         - H3C_TX1801
         - H3C_TX1806
@@ -39,14 +28,6 @@ on:
         - Netgear_R7450
         - Nokia-Sbell_A-040W-Q
         - Phicomm_K2P
-        - Phicomm_K2P-NANO
-        - Phicomm_K2P-USB
-        - QianmoBus_B1
-        - Raisecom_MSG1500_X.00
-        - Raisecom_MSG1500_Z.00
-        - Redmi_AC2100
-        - Skspruce_WIA3300-10
-        - SIM_AX1800T
         - Xiaomi_4
         - Xiaomi_AC2100
         - Xiaomi_CR6606
@@ -54,17 +35,6 @@ on:
         - Xiaomi_CR6609
         - Xiaomi_R3G
         - Xiaomi_R3P
-        - Xiaomi_R3P-PB
-        - Xiaomi_R3P-SPI
-        - Xiaomi_R4A
-        - Xiaoyu_C1
-        - Xiaoyu_C3
-        - Xiaoyu_C5
-        - Youhua_WR1200JS
-        - Youhua_WR330
-        - ZTE_E8820V2
-        - ZTE_E8820S
-        - ZTT_RX6000
         default: SIM_AX1800T
       plugins:
         description: 'json format string of include configs'
@@ -77,7 +47,7 @@ on:
       customization:
         description: 'json format string of customized configs'
         required: true
-        default: '{"rainbowui":"y","specializedlogo":"n","changebrandlogo":"n","lanip":"192.168.2.1","signaccount":"admin","signpassword":"admin","wifi2gssid":"","wifi5gssid":"","wifi2gpsk":"","wifi5gpsk":""}'
+        default: '{"rainbowui":"n","specializedlogo":"n","changebrandlogo":"n","lanip":"192.178.8.1","signaccount":"admin","signpassword":"admin","wifi2gssid":"","wifi5gssid":"","wifi2gpsk":"","wifi5gpsk":""}'
       firmwarever:
         description: 'firmware''s version'
         required: true
