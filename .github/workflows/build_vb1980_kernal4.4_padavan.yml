@@ -491,12 +491,15 @@ jobs:
         cd $FIRMWARE_PATH
         echo "FIRMWARE=$PWD" >> $GITHUB_ENV
         echo "STATUS=success" >> $GITHUB_ENV
-    - name : Upload packages
+    - name: Upload firmware and config files
       uses: actions/upload-artifact@main
-      if: env.STATUS == 'success'
+      if: github.event.inputs.uploadanon == 'true'
       with:
         name: Padavan44-packages
-        path: ${{ env.FIRMWARE }}
+        path: |
+          ${{ env.FIRMWARE }}/*.trx
+          $WORK_PATH/trunk/.config
+
     - name: Upload firmware to anonfiles
       if: env.STATUS == 'success' && github.event.inputs.uploadanon == 'true'
       run: |
