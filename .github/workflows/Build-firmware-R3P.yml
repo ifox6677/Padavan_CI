@@ -1,0 +1,75 @@
+name: Build firmware
+
+on:
+  workflow_dispatch:
+    inputs:
+      target:
+        type: choice
+        options: # 选择编译的设备
+          - 360_T6M
+          - 360_T6M-PB
+          - Arcadyan_WE410443-TC
+          - Asus_RT-AC85P
+          - ...
+        default: SIM_AX1800T
+      plugins: # 插件配置
+        required: true
+        default: '{"vpnsvr":"n","vpncli":"n","ss":"y","xray":"y","trojan":"y"}'
+      customization: # 自定义配置
+        required: true
+        default: '{"lanip":"192.168.2.1","signaccount":"admin","signpassword":"admin"}'
+      firmwarever:
+        required: true
+        default: '20240403'
+      uploadanon:
+        type: boolean
+        default: false
+
+env:
+  REPOSITORY_URL: https://github.com/vb1980/padavan-4.4.git
+  WORK_PATH: /opt/padavan-4.4
+  FIRMWARE_PATH: /opt/firmwares
+  TIME_ZONE: Asia/Shanghai
+  FIRMWARE_AUTHOR: vb1980
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+    - uses: actions/checkout@v4
+
+    - name: Setup environment
+      run: |
+        sudo apt-get update && sudo apt-get install -y build-essential curl git
+        sudo timedatectl set-timezone "$TIME_ZONE"
+
+    - name: Clone source code and toolchain
+      run: |
+        git clone --depth=1 $REPOSITORY_URL $WORK_PATH
+        cd $WORK_PATH && tar -Jxvf mipsel-linux-uclibc-gcc10-uClibcng1048.tar.xz -C toolchain-mipsel/toolchain-4.4.x
+
+    - name: Load device settings
+      run: |
+        . ./device_settings.sh ${{ github.event.inputs.target }} ${{ github.event.inputs.plugins }} ${{ github.event.inputs.customization }}
+
+    - name: Configure firmware
+      run: |
+        . ./config.sh
+
+    - name: Build firmware
+      run: |
+        cd $WORK_PATH && sudo make ${{ env.model }}
+        mkdir -p $FIRMWARE_PATH && mv $WORK_PATH/trunk/images/*.trx $FIRMWARE_PATH
+
+    - name: Upload firmware
+      uses: actions/upload-artifact@main
+      with:
+        name: firmware-${{ env.model }}
+        path: $FIRMWARE_PATH
+
+    - name: Upload to anonfiles (optional)
+      if: github.event.inputs.uploadanon == 'true'
+      run: |
+        curl -fsSL git.io/file-transfer | sh
+        ./transfer anon --no-progress $FIRMWARE_PATH/*.trx
