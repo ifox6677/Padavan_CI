@@ -5,31 +5,26 @@ on:
     inputs:
       target:
         type: choice
-        options: # 选择编译的设备
+        options: 
           - 360_T6M
           - 360_T6M-PB
           - Arcadyan_WE410443-TC
-          - Xiaomi_R3P
-        default: Xiaomi_R3P
-      plugins: # 插件配置
+          - Asus_RT-AC85P
+          # 继续添加其他设备选项
+        default: SIM_AX1800T
+      plugins:
         required: true
-        default: '{"vpnsvr":"n","vpncli":"n","ss":"y","xray":"y","trojan":"y"}'
-      customization: # 自定义配置
+      customization:
         required: true
-        default: '{"lanip":"192.168.2.1","signaccount":"admin","signpassword":"admin"}'
       firmwarever:
         required: true
-        default: '20240403'
-      uploadanon:
-        type: boolean
-        default: false
 
 env:
-  REPOSITORY_URL: https://github.com/ifox6677/padavan-4.4.git
+  REPOSITORY_URL: https://github.com/vb1980/padavan-4.4.git
   WORK_PATH: /opt/padavan-4.4
   FIRMWARE_PATH: /opt/firmwares
   TIME_ZONE: Asia/Shanghai
-  FIRMWARE_AUTHOR: Padavan
+  FIRMWARE_AUTHOR: vb1980
 
 jobs:
   build:
@@ -37,6 +32,18 @@ jobs:
 
     steps:
     - uses: actions/checkout@v4
+
+    - name: Load default configurations from JSON
+      id: load_defaults
+      run: |
+        default_plugins=$(jq -r '.plugins' defaults.json)
+        default_customization=$(jq -r '.customization' defaults.json)
+        default_firmwarever=$(jq -r '.firmwarever' defaults.json)
+
+        # 如果未提供输入，则使用默认值
+        echo "PLUGINS=${{ github.event.inputs.plugins || $default_plugins }}" >> $GITHUB_ENV
+        echo "CUSTOMIZATION=${{ github.event.inputs.customization || $default_customization }}" >> $GITHUB_ENV
+        echo "FIRMWARE_VER=${{ github.event.inputs.firmwarever || $default_firmwarever }}" >> $GITHUB_ENV
 
     - name: Setup environment
       run: |
@@ -50,7 +57,7 @@ jobs:
 
     - name: Load device settings
       run: |
-        . ./device_settings.sh ${{ github.event.inputs.target }} ${{ github.event.inputs.plugins }} ${{ github.event.inputs.customization }}
+        . ./device_settings.sh ${{ github.event.inputs.target }} $PLUGINS $CUSTOMIZATION
 
     - name: Configure firmware
       run: |
@@ -58,7 +65,7 @@ jobs:
 
     - name: Build firmware
       run: |
-        cd $WORK_PATH && sudo make ${{ env.model }}
+        cd $WORK_PATH && sudo make $MODEL
         mkdir -p $FIRMWARE_PATH && mv $WORK_PATH/trunk/images/*.trx $FIRMWARE_PATH
 
     - name: Upload firmware
