@@ -14,7 +14,7 @@ case $target in
     model="360-T6M-PB"
     ;;
   "Arcadyan_WE410443-TC")
-    model="WE410443-TC"
+    model="MI-R3P"
     ;;
   # 继续为其他设备设置型号...
   *)
