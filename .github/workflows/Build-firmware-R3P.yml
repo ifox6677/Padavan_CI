@@ -14,10 +14,13 @@ on:
         default: Xiaomi-R3P  # 确保与选项一致
       plugins:
         required: true
+        default: '{"vpnsvr":"n","vpncli":"n","ss":"y","xray":"y","trojan":"y","ssobfs":"y","dnsforwarder":"n","adbyby":"n","adguardhome":"n","smartdns":"n","aliddns":"n","zerotier":"n","ddnsto":"n","wireguard":"n","frpc":"y","aldrive":"n","sqm":"y","mentohust":"n","scutclient":"n","njitclient":"n","minieap":"n","dogcom":"n"}'
       customization:
         required: true
+        default: '{"lanip":"192.168.2.1","signaccount":"admin","signpassword":"admin","wifi2gssid":"","wifi5gssid":"","wifi2gpsk":"","wifi5gpsk":""}'
       firmwarever:
         required: true
+        default: '20240403'
 
 env:
   REPOSITORY_URL: https://github.com/ifox6677/padavan-4.4.git
@@ -41,21 +44,10 @@ jobs:
         default_customization=$(jq -r '.customization' defaults.json)
         default_firmwarever=$(jq -r '.firmwarever' defaults.json)
 
-        # 如果未提供输入，则使用默认值
-        echo "PLUGINS=${{ github.event.inputs.plugins }}" >> $GITHUB_ENV
-        echo "CUSTOMIZATION=${{ github.event.inputs.customization }}" >> $GITHUB_ENV
-        echo "FIRMWARE_VER=${{ github.event.inputs.firmwarever }}" >> $GITHUB_ENV
-
-        # 如果未提供，则设置为默认值
-        if [ -z "${{ github.event.inputs.plugins }}" ]; then
-          echo "PLUGINS=$default_plugins" >> $GITHUB_ENV
-        fi
-        if [ -z "${{ github.event.inputs.customization }}" ]; then
-          echo "CUSTOMIZATION=$default_customization" >> $GITHUB_ENV
-        fi
-        if [ -z "${{ github.event.inputs.firmwarever }}" ]; then
-          echo "FIRMWARE_VER=$default_firmwarever" >> $GITHUB_ENV
-        fi
+        # 使用 GitHub Actions 的条件语句处理输入值
+        echo "PLUGINS=${{ github.event.inputs.plugins || default_plugins }}" >> $GITHUB_ENV
+        echo "CUSTOMIZATION=${{ github.event.inputs.customization || default_customization }}" >> $GITHUB_ENV
+        echo "FIRMWARE_VER=${{ github.event.inputs.firmwarever || default_firmwarever }}" >> $GITHUB_ENV
 
     - name: Setup environment
       run: |
