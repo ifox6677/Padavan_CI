@@ -9,9 +9,9 @@ on:
           - 360_T6M
           - 360_T6M-PB
           - Arcadyan_WE410443-TC
-          - Asus_RT-AC85P
+          - Xiaomi_R3P
           - ...
-        default: SIM_AX1800T
+        default: Xiaomi_R3P
       plugins: # 插件配置
         required: true
         default: '{"vpnsvr":"n","vpncli":"n","ss":"y","xray":"y","trojan":"y"}'
