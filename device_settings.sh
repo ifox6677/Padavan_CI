@@ -20,7 +20,7 @@ case $target in
     model="RT-AC85P"
     ;;
   # ...（其他型号）...
-  "Xiaomi_R3P")
+  "Xiaomi-R3P")
     model="MI-R3P"
     ;;
   *)
