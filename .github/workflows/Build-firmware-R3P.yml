@@ -68,10 +68,15 @@ jobs:
         sudo apt-get install -y build-essential curl git jq  # 确保安装jq
         sudo timedatectl set-timezone "$TIME_ZONE"
 
+    - name: Download and extract toolchain
+      run: |
+        TOOLCHAIN_URL="http://example.com/path/to/mipsel-linux-uclibc-gcc10-uClibcng1048.tar.xz"  # 替换为实际的工具链 URL
+        wget -O mipsel-linux-uclibc-gcc10-uClibcng1048.tar.xz "$TOOLCHAIN_URL"  # 下载工具链
+        tar -Jxvf mipsel-linux-uclibc-gcc10-uClibcng1048.tar.xz -C $WORK_PATH/toolchain-mipsel/toolchain-4.4.x  # 解压缩
+
     - name: Clone source code and toolchain
       run: |
         git clone --depth=1 $REPOSITORY_URL $WORK_PATH
-        cd $WORK_PATH && tar -Jxvf mipsel-linux-uclibc-gcc10-uClibcng1048.tar.xz -C toolchain-mipsel/toolchain-4.4.x
 
     - name: Load device settings
       run: |
