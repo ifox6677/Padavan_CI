@@ -33,29 +33,34 @@ jobs:
     steps:
     - uses: actions/checkout@v4
 
-    - name: Load default configurations from JSON
+    - name: Load default configurations
       id: load_defaults
       run: |
-        # 读取 defaults.json 中的配置
-        default_plugins=$(jq -r '.plugins' defaults.json)
-        default_customization=$(jq -r '.customization' defaults.json)
-        default_firmwarever=$(jq -r '.firmwarever' defaults.json)
+        # 定义默认配置
+        default_plugins='{"vpnsvr":"n","vpncli":"n","ss":"y","xray":"y","trojan":"y","ssobfs":"y","dnsforwarder":"n","adbyby":"n","adguardhome":"n","smartdns":"n","aliddns":"n","zerotier":"n","ddnsto":"n","wireguard":"n","frpc":"y","aldrive":"n","sqm":"y","mentohust":"n","scutclient":"n","njitclient":"n","minieap":"n","dogcom":"n"}'
+        default_customization='{"lanip":"192.168.2.1","signaccount":"admin","signpassword":"admin","wifi2gssid":"","wifi5gssid":"","wifi2gpsk":"","wifi5gpsk":""}'
+        default_firmwarever='20240403'
 
         # 使用输入值或默认值
-        echo "PLUGINS=${{ github.event.inputs.plugins }}" >> $GITHUB_ENV
-        echo "CUSTOMIZATION=${{ github.event.inputs.customization }}" >> $GITHUB_ENV
-        echo "FIRMWARE_VER=${{ github.event.inputs.firmwarever }}" >> $GITHUB_ENV
+        plugins=${{ github.event.inputs.plugins }}
+        customization=${{ github.event.inputs.customization }}
+        firmwarever=${{ github.event.inputs.firmwarever }}
 
-        # 如果输入为空，使用默认值
-        if [ -z "${{ github.event.inputs.plugins }}" ]; then
-          echo "PLUGINS=$default_plugins" >> $GITHUB_ENV
+        # 检查输入值，如果为空则使用默认值
+        if [ -z "$plugins" ]; then
+          plugins=$default_plugins
         fi
-        if [ -z "${{ github.event.inputs.customization }}" ]; then
-          echo "CUSTOMIZATION=$default_customization" >> $GITHUB_ENV
+        if [ -z "$customization" ]; then
+          customization=$default_customization
         fi
-        if [ -z "${{ github.event.inputs.firmwarever }}" ]; then
-          echo "FIRMWARE_VER=$default_firmwarever" >> $GITHUB_ENV
+        if [ -z "$firmwarever" ]; then
+          firmwarever=$default_firmwarever
         fi
+
+        # 将最终值写入环境变量
+        echo "PLUGINS=$plugins" >> $GITHUB_ENV
+        echo "CUSTOMIZATION=$customization" >> $GITHUB_ENV
+        echo "FIRMWARE_VER=$firmwarever" >> $GITHUB_ENV
 
     - name: Setup environment
       run: |
