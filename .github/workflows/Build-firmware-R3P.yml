@@ -11,7 +11,7 @@ on:
           - Arcadyan_WE410443-TC
           - Asus_RT-AC85P
           # 继续添加其他设备选项
-        default: Mi-R3P
+        default: Xiaomi-R3P  # 确保与选项一致
       plugins:
         required: true
       customization:
@@ -41,13 +41,14 @@ jobs:
         default_firmwarever=$(jq -r '.firmwarever' defaults.json)
 
         # 如果未提供输入，则使用默认值
-        echo "PLUGINS=${{ github.event.inputs.plugins || $default_plugins }}" >> $GITHUB_ENV
-        echo "CUSTOMIZATION=${{ github.event.inputs.customization || $default_customization }}" >> $GITHUB_ENV
-        echo "FIRMWARE_VER=${{ github.event.inputs.firmwarever || $default_firmwarever }}" >> $GITHUB_ENV
+        echo "PLUGINS=${{ github.event.inputs.plugins || default_plugins }}" >> $GITHUB_ENV
+        echo "CUSTOMIZATION=${{ github.event.inputs.customization || default_customization }}" >> $GITHUB_ENV
+        echo "FIRMWARE_VER=${{ github.event.inputs.firmwarever || default_firmwarever }}" >> $GITHUB_ENV
 
     - name: Setup environment
       run: |
-        sudo apt-get update && sudo apt-get install -y build-essential curl git
+        sudo apt-get update
+        sudo apt-get install -y build-essential curl git jq  # 确保安装jq
         sudo timedatectl set-timezone "$TIME_ZONE"
 
     - name: Clone source code and toolchain
@@ -57,7 +58,7 @@ jobs:
 
     - name: Load device settings
       run: |
-        . ./device_settings.sh ${{ github.event.inputs.target }} $PLUGINS $CUSTOMIZATION
+        . ./device_settings.sh "${{ github.event.inputs.target }}" "$PLUGINS" "$CUSTOMIZATION"
 
     - name: Configure firmware
       run: |
@@ -65,17 +66,18 @@ jobs:
 
     - name: Build firmware
       run: |
-        cd $WORK_PATH && sudo make $MODEL
-        mkdir -p $FIRMWARE_PATH && mv $WORK_PATH/trunk/images/*.trx $FIRMWARE_PATH
+        cd $WORK_PATH && sudo make "$MODEL"  # 使用引号处理模型名称
+        mkdir -p "$FIRMWARE_PATH" && mv "$WORK_PATH/trunk/images/*.trx" "$FIRMWARE_PATH"  # 使用引号处理路径
 
     - name: Upload firmware
       uses: actions/upload-artifact@main
       with:
         name: firmware-${{ env.model }}
-        path: $FIRMWARE_PATH
+        path: "$FIRMWARE_PATH"
 
     - name: Upload to anonfiles (optional)
       if: github.event.inputs.uploadanon == 'true'
       run: |
         curl -fsSL git.io/file-transfer | sh
-        ./transfer anon --no-progress $FIRMWARE_PATH/*.trx
+        ./transfer anon --no-progress "$FIRMWARE_PATH/*.trx"
+
