@@ -182,7 +182,7 @@ case $target in
     model="ZTT-RX6000"
     ;;
   *)
-    model="K2P" # 默认值
+    model="Mi-R3P" # 默认值
     ;;
 esac
 
