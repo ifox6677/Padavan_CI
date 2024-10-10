@@ -6,12 +6,12 @@ on:
       target:
         type: choice
         options: 
-          - Xiaomi-R3P
+          - Xiaomi_R3P
           - 360_T6M-PB
           - Arcadyan_WE410443-TC
           - Asus_RT-AC85P
           # 继续添加其他设备选项
-        default: Xiaomi-R3P  # 确保与选项一致
+        default: Xiaomi_3P  # 确保与选项一致
       plugins:
         required: true
       customization:
