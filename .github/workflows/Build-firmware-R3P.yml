@@ -36,11 +36,12 @@ jobs:
     - name: Load default configurations from JSON
       id: load_defaults
       run: |
+        # 读取 defaults.json 中的配置
         default_plugins=$(jq -r '.plugins' defaults.json)
         default_customization=$(jq -r '.customization' defaults.json)
         default_firmwarever=$(jq -r '.firmwarever' defaults.json)
 
-        # 如果未提供输入，则使用默认值
+        # 使用 GitHub Actions 的条件语句处理输入值
         echo "PLUGINS=${{ github.event.inputs.plugins || default_plugins }}" >> $GITHUB_ENV
         echo "CUSTOMIZATION=${{ github.event.inputs.customization || default_customization }}" >> $GITHUB_ENV
         echo "FIRMWARE_VER=${{ github.event.inputs.firmwarever || default_firmwarever }}" >> $GITHUB_ENV
@@ -58,7 +59,7 @@ jobs:
 
     - name: Load device settings
       run: |
-        . ./device_settings.sh "${{ github.event.inputs.target }}" "$PLUGINS" "$CUSTOMIZATION"
+        . ./device_settings.sh "${{ github.event.inputs.target }}" "${{ env.PLUGINS }}" "${{ env.CUSTOMIZATION }}"
 
     - name: Configure firmware
       run: |
@@ -80,4 +81,3 @@ jobs:
       run: |
         curl -fsSL git.io/file-transfer | sh
         ./transfer anon --no-progress "$FIRMWARE_PATH/*.trx"
-
