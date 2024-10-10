@@ -29,7 +29,7 @@ env:
   WORK_PATH: /opt/padavan-4.4
   FIRMWARE_PATH: /opt/firmwares
   TIME_ZONE: Asia/Shanghai
-  FIRMWARE_AUTHOR: vb1980
+  FIRMWARE_AUTHOR: Padavan
 
 jobs:
   build:
