@@ -10,7 +10,6 @@ on:
           - 360_T6M-PB
           - Arcadyan_WE410443-TC
           - Xiaomi_R3P
-          - ...
         default: Xiaomi_R3P
       plugins: # 插件配置
         required: true
