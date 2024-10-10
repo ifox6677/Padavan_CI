@@ -60,7 +60,7 @@ jobs:
 
     - name: Extract toolchain
       run: |
-        cp -f /path/to/mipsel-linux-uclibc-gcc10-uClibcng1048.tar.xz $WORK_PATH  # 替换为工具链的实际路径
+        cp -f toolchain/mipsel-linux-uclibc-gcc10-uClibcng1048.tar.xz $WORK_PATH # 替换为工具链的实际路径
         cd $WORK_PATH
         mkdir -p toolchain-mipsel/toolchain-4.4.x  # 创建解压目标目录
         tar -Jxvf mipsel-linux-uclibc-gcc10-uClibcng1048.tar.xz -C toolchain-mipsel/toolchain-4.4.x  # 解压工具链
