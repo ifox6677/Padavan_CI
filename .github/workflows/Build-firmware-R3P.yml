@@ -11,7 +11,7 @@ on:
           - Arcadyan_WE410443-TC
           - Asus_RT-AC85P
           # 继续添加其他设备选项
-        default: Xiaomi-R3P
+        default: Mi-R3P
       plugins:
         required: true
       customization:
