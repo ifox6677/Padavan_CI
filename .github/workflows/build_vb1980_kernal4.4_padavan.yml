@@ -93,7 +93,7 @@ env:
   DICT_FILE: ./user/www/dict/CN.dict
   TIME_ZONE: Asia/Shanghai
   FIRMWARE_DATEPREFIX: $(date +"%Y%m%d")
-  FIRMWARE_AUTHOR: vb1980
+  FIRMWARE_AUTHOR: Padavan
   FIRMWARE_PATH: /opt/firmwares
 jobs:
   build:
