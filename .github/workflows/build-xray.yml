@@ -1,60 +1,61 @@
-name: Build Xray
+name: Build Xray  # 工作流名称
 
 on: 
-  workflow_dispatch:
+  workflow_dispatch:  # 允许手动触发工作流
     inputs:
-      uploadanon:
-        type: boolean
-        description: 'whether to upload to anonfiles'
-        default: 'false'
+      uploadanon:  # 输入参数，决定是否上传到匿名文件
+        type: boolean  # 输入类型为布尔值
+        description: '是否上传到匿名文件'  # 输入参数描述
+        default: 'false'  # 默认值为 false
+
 jobs:
-  build:
-    runs-on: ubuntu-latest
-    if: github.event.repository.owner.id == github.event.sender.id
+  build:  # 作业名称
+    runs-on: ubuntu-latest  # 在最新的 Ubuntu 环境中运行
+    if: github.event.repository.owner.id == github.event.sender.id  # 确保只有仓库所有者才能运行
 
-    steps:
-    - uses: actions/checkout@v4
-    - uses: actions/setup-go@v5
+    steps:  # 执行步骤
+    - uses: actions/checkout@v4  # 检出代码
+    - uses: actions/setup-go@v5  # 设置 Go 环境
       with:
-        go-version: '1.22.0'
-        check-latest: true
-        cache-dependency-path: '**/go.sum'
+        go-version: '1.22.0'  # Go 版本
+        check-latest: true  # 检查最新版本
+        cache-dependency-path: '**/go.sum'  # 缓存依赖路径
 
-    - name: Initialization environment
+    - name: 初始化环境  # 步骤名称
       run: |
-        sudo apt-get update
-        sudo apt install upx git -y
+        sudo apt-get update  # 更新包列表
+        sudo apt install upx git -y  # 安装 upx 和 git
 
-    - name: Clone&Build source code
-      id: build
+    - name: 克隆并构建源代码  # 步骤名称
+      id: build  # 步骤 ID
       run: |
-        git clone --depth=1 https://github.com/xtls/xray-core.git xray-core
-        cd xray-core/main
-        GOOS=linux GOARCH=mipsle go build -o ../../xraybin/xray -trimpath -ldflags "-s -w -buildid=" ./
-        cd ../../xraybin
-        #upx -9 xray
-        shopt -s extglob
-        rm -vrf !("xray")
-        echo "xray=$PWD" >> $GITHUB_ENV
-        echo "STATUS=success" >> $GITHUB_ENV
+        git clone --depth=1 https://github.com/xtls/xray-core.git xray-core  # 克隆 xray-core 仓库
+        cd xray-core/main  # 进入主目录
+        GOOS=linux GOARCH=mipsle go build -o ../../xraybin/xray -trimpath -ldflags "-s -w -buildid=" ./  # 构建可执行文件
+        cd ../../xraybin  # 进入 xraybin 目录
+        # upx -9 xray  # 压缩可执行文件（注释掉）
+        shopt -s extglob  # 启用扩展模式
+        rm -vrf !("xray")  # 删除 xraybin 中的其他文件，只保留 xray
+        echo "xray=$PWD" >> $GITHUB_ENV  # 设置环境变量 xray 为当前路径
+        echo "STATUS=success" >> $GITHUB_ENV  # 设置状态为成功
 
-    - name : Upload packages
-      uses: actions/upload-artifact@main
-      if: env.STATUS == 'success'
+    - name: 上传包  # 步骤名称
+      uses: actions/upload-artifact@main  # 上传构建的文件
+      if: env.STATUS == 'success'  # 仅在成功时上传
       with:
-        name: xray-packages
-        path: ${{ env.xray }}
-        
-    - name: Upload xray bin to anonfiles
-      if: env.STATUS == 'success' && github.event.inputs.uploadanon == 'true'
+        name: xray-packages  # 上传的包名称
+        path: ${{ env.xray }}  # 上传的文件路径
+
+    - name: 将 xray 二进制文件上传到匿名文件  # 步骤名称
+      if: env.STATUS == 'success' && github.event.inputs.uploadanon == 'true'  # 仅在成功且选择上传时执行
       run: |
-        curl -fsSL git.io/file-transfer | sh
-        ./transfer anon --no-progress ${v2ray} 2>&1 | tee anonfile.log
-        echo "::warning file=anonfile.com::$(cat anonfile.log | grep -o -E "https?://[a-zA-Z0-9\.\/_&=@$%?~#-]*")"
-        
-    - name: Remove obsolete xray(s) on artifacts
-      uses: Bonnie2980/gha-remove-artifacts@master
-      if: env.STATUS == 'success'
+        curl -fsSL git.io/file-transfer | sh  # 下载并运行文件上传脚本
+        ./transfer anon --no-progress ${v2ray} 2>&1 | tee anonfile.log  # 上传文件并记录日志
+        echo "::warning file=anonfile.com::$(cat anonfile.log | grep -o -E "https?://[a-zA-Z0-9\.\/_&=@$%?~#-]*")"  # 提取上传后的链接并发出警告
+
+    - name: 删除过期的 xray 产物  # 步骤名称
+      uses: Bonnie2980/gha-remove-artifacts@master  # 使用删除过期文件的 Action
+      if: env.STATUS == 'success'  # 仅在成功时执行
       with:
-        age: '1 day'
-        skip-recent: 5
+        age: '1 day'  # 删除 1 天前的文件
+        skip-recent: 5  # 跳过最近的 5 个文件
